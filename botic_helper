@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#echo "$@" >> /tmp/botic_helper.log
+#logger -p 0 "$@"
+
+IFS=,
+set -- $1
+
+case "$1" in
+	ctl_info)
+		# fixed,min,max,step,tlv_type,tlv_a,tlb_b
+		if [ "$2" = "MasterTrim Playback Volume" ]; then
+			CI="1,0,0x7fffffff,0,2,-12000,0"
+		else
+			CI="1,-255,0,0,4,-12750,0"
+		fi
+		echo "$CI" > "/sys/$3"
+		;;
+	ctl_get)
+		if [[ "$2" == "MasterTrim Playback Volume" ]]; then
+			M1=$(i2cget -y 1 0x48 23)
+			M2=$(i2cget -y 1 0x48 22)
+			M3=$(i2cget -y 1 0x48 21)
+			M4=$(i2cget -y 1 0x48 20)
+			V="$M1${M2#0x}${M3#0x}${M4#0x}"
+			echo "$V" > "/sys/$3"
+		elif [[ "$2" =~ ^DAC([0-7])\ Playback\ Volume$ ]]; then
+			R=${BASH_REMATCH[1]}
+			# retrieve volume on the requested DAC
+			V=$(i2cget -y 1 0x48 "$R")
+			# add '-'
+			echo "-$V" > "/sys/$3"
+		else
+			exit 1
+		fi
+		;;
+	ctl_set)
+		if [[ "$2" == "MasterTrim Playback Volume" ]]; then
+			V=$(cat "/sys/$3")
+			V=$(printf "%08x" "$V")
+			i2cset -y 1 0x48 23 "0x${V:0:2}"
+			i2cset -y 1 0x48 22 "0x${V:2:2}"
+			i2cset -y 1 0x48 21 "0x${V:4:2}"
+			i2cset -y 1 0x48 20 "0x${V:6:2}"
+		elif [[ "$2" =~ ^DAC([0-7])\ Playback\ Volume$ ]]; then
+			R=${BASH_REMATCH[1]}
+			V=$(cat "/sys/$3")
+			# remove '-'
+			V=${V#-}
+			# set volume on the requested DAC
+			i2cset -y 1 0x48 "$R" "$V"
+		else
+			exit 1
+		fi
+		;;
+	hw_params)
+		;;
+	*)
+		;;
+esac
