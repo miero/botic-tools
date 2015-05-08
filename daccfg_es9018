@@ -1,0 +1,48 @@
+#!/bin/bash -e
+
+dac_upd()
+{
+	V=`i2cget -y 1 0x48 "$1"`
+	V=$(( (V & ~$2) | $3 ))
+	i2cset -y 1 0x48 "$1" "$V"
+}
+
+### input remapping
+#dac_upd 14 0xf0 0xf0 # enable
+dac_upd 14 0xf0 0x00 # disable (default)
+
+### jitter reduction
+dac_upd 10 4 0 # bypass and stop
+#dac_upd 10 4 4 # enable (default)
+
+### SPDIF autodetect
+dac_upd 17 8 0 # disable
+#dac_upd 17 8 8 # enable (default)
+
+### use best DPLL
+dac_upd 25 2 0 # disable
+#dac_upd 25 2 2 # enable (default)
+
+### DPLL bandwidth
+#dac_upd 11 0x1c 0x00 # no
+dac_upd 11 0x1c 0x04 # lowest (default)
+#dac_upd 11 0x1c 0x08 # low
+#dac_upd 11 0x1c 0x0c # med-low
+#dac_upd 11 0x1c 0x10 # medium
+#dac_upd 11 0x1c 0x14 # med-high
+#dac_upd 11 0x1c 0x18 # high
+#dac_upd 11 0x1c 0x1c # highest
+
+### Quantizer and Differential mode
+dac_upd 15 0xff 0x00; dac_upd 14 0x8 0x8 # (8ch) 6-bit true (default)
+#dac_upd 15 0xff 0x55; dac_upd 14 0x8 0x0 # (8ch) 7-bit pseudo
+#dac_upd 15 0xff 0x55; dac_upd 14 0x8 0x8 # (4ch) 7-bit true
+#dac_upd 15 0xff 0xaa; dac_upd 14 0x8 0x0 # (4ch) 8-bit pseudo
+dac_upd 15 0xff 0xaa; dac_upd 14 0x8 0x8 # (2ch) 8-bit true
+#dac_upd 15 0xff 0xff; dac_upd 14 0x8 0x0 # (2ch) 9-bit pseudo
+
+### IIR bandwidth
+#dac_upd 14 0x6 0x0 # PCM normal
+#dac_upd 14 0x6 0x2 # DSD 50k (default)
+#dac_upd 14 0x6 0x4 # DSD 60k
+#dac_upd 14 0x6 0x6 # DSD 70k

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+dac_upd()
+{
+        V=`i2cget -y 1 0x48 "$1"`
+        V=$(( (V & ~$2) | $3 ))
+        i2cset -y 1 0x48 "$1" "$V"
+}
+
 #echo "$@" >> /tmp/botic_helper.log
 #logger -p 0 "$@"
 
@@ -54,6 +61,29 @@ case "$1" in
 		fi
 		;;
 	hw_params)
+		# Example: hw_params,P,2,16385,96000,24576000,6144000,0,2,0,2,0,0
+		# ${1}  - hw_params (operation name)
+		# ${2}  - P (playback)
+		# ${3}  - 2 (channels)
+		# ${4}  - 16385 (dai format)
+		# ${5}  - 96000 (freq)
+		# ${6}  - 24576000 (mclk freq)
+		# ${7}  - 6144000 (bclk freq)
+		# ${8}  - 0 (this is not DSD stream)
+		# ${9}  - 2 (number of data outputs ~ serconfig)
+		# ${10} - 0 (# of the 1st output)
+		# ${11} - 2 (# of the 2nd output)
+		# ${12} - 0 (# of the 3rd output - not used here)
+		# ${13} - 0 (# of the 4th output - not used here)
+
+		### IIR bandwidth
+		if [[ "${8}" == 0 ]]; then 
+			dac_upd 14 0x6 0x0 # PCM normal
+		else
+			dac_upd 14 0x6 0x2 # DSD 50k
+			#dac_upd 14 0x6 0x4 # DSD 60k
+			#dac_upd 14 0x6 0x6 # DSD 70k
+		fi
 		;;
 	*)
 		;;
