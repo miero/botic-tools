@@ -1,0 +1,33 @@
+#!/bin/sh
+
+###
+### GPIO pin setup for Hermes-BBB from Twisted Pear Audio
+###
+
+### LED1 ###
+echo 30 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio30/direction
+
+### LED2 ###
+echo 60 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio60/direction
+
+### LED3 ###
+echo 31 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio31/direction
+
+### Button1 ###
+echo 51 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio51/direction
+echo both > /sys/class/gpio/gpio51/edge
+
+### Button2 ###
+echo 48 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio48/direction
+echo both > /sys/class/gpio/gpio48/edge
+
+### Button3 ###
+echo 49 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio49/direction
+echo both > /sys/class/gpio/gpio49/edge
+
