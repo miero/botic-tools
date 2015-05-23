@@ -7,14 +7,17 @@
 ### LED1 ###
 echo 30 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio30/direction
+echo 0 > /sys/class/gpio/gpio30/value
 
 ### LED2 ###
 echo 60 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio60/direction
+echo 0 > /sys/class/gpio/gpio60/value
 
 ### LED3 ###
 echo 31 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio31/direction
+echo 0 > /sys/class/gpio/gpio31/value
 
 ### Button1 ###
 echo 51 > /sys/class/gpio/export
